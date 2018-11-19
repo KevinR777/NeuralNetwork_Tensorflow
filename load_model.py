@@ -20,7 +20,7 @@ new_model = None
 #Se encarga de cargar el modelo o red neuronal especificada
 def loadModel(modelName):
 	global new_model
-	new_model = tf.keras.models.load_model(modelName + '.model')
+	new_model = tf.keras.models.load_model(modelName + '.h5')
 
 
 #Funcion: testModel()
@@ -29,13 +29,13 @@ def testModel():
 	global new_model, test_images
 	i = 0
 	#For para recorrer imagenes del test set
-	for i in range(1202,1210):
+	for i in range(8000,8010):
 		#Hacemos la prediccion en base al test set de imagenes
 		predictions = new_model.predict([test_images])
 		#Imprimimos la prediccion
 		print(np.argmax(predictions[i]))
 		#Mostramos la imagen para comprobar
-		plt.imshow(test_images[i])
+		plt.imshow(test_images[i], cmap=plt.cm.binary)
 		plt.show()
 
 

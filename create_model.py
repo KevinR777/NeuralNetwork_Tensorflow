@@ -39,9 +39,8 @@ def buildModel():
 	model.add(tf.keras.layers.Flatten(input_shape = ((28, 28)))) #Capa de input, el input lo queremos ver de manera plana
 	#Vamos a crear para este modelo, dos capas intermedias
 	model.add(tf.keras.layers.Dense(128,activation = tf.nn.relu)) #Capa hidden 1, 128 es el numero de neuronas o units, y se le pasa la funcion activation o lo que va a realizar dicha neurona si es "disparada" o "activada". Relu es la default o rectify linear unit
-	model.add(tf.keras.layers.Dense(128,activation = tf.nn.relu)) #Capa hidden 2
-	#Genera un output de acuerdo a los inputs recibidos (activation function)
-	#Capa de output
+	model.add(tf.keras.layers.Dense(128,activation = tf.nn.relu))
+	#Vamos a crear para este modelo, dos capas intermedias
 	model.add(tf.keras.layers.Dense(10,activation = tf.nn.softmax)) #Capa output, utilizamos softmax por que queremos visualizar el output como una distribucion de porcentajes
 	#Fin del modelo
 
@@ -60,14 +59,19 @@ def trainModel():
 
 	#Calculamos los valores de perdida y de precision
 	val_loss, val_acc = model.evaluate(train_images, train_labels)
-	print(val_loss)
-	print(val_acc)
+	print("El valor o porcentaje de perdida es del: " + str(val_loss))
+	print("El valor o porcentaje de precision es del: " + str(val_acc))
+
+
+	val_loss_test, val_acc_test = model.evaluate(test_images, test_labels)
+	print("El valor o porcentaje de perdida con el conjunto de prueba es del: " + str(val_loss_test))
+	print("El valor o porcentaje de precision con el conjunto de prueba es del: " + str(val_acc_test))
 
 #Funcion: saveModel
 #Guardamos el modelo
 def saveModel(modelName):
 	global model
-	model.save(modelName + '.model')
+	model.save(modelName + '.h5')
 
 #Funcion: main
 #Normaliza la data, construye el modelo, lo entrena y finalmente lo guarda
