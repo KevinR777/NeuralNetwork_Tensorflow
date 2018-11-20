@@ -38,11 +38,28 @@ def buildModel():
 	#Esta capa no tiene parámetros para aprender; sólo reformatea los datos.
 	model.add(tf.keras.layers.Flatten(input_shape = ((28, 28)))) #Capa de input, el input lo queremos ver de manera plana
 	#Vamos a crear para este modelo, dos capas intermedias
-	model.add(tf.keras.layers.Dense(128,activation = tf.nn.relu)) #Capa hidden 1, 128 es el numero de neuronas o units, y se le pasa la funcion activation o lo que va a realizar dicha neurona si es "disparada" o "activada". Relu es la default o rectify linear unit
+	#model.add(tf.keras.layers.Dense(64,activation = tf.nn.relu)) #Capa hidden 1, 128 es el numero de neuronas o units, y se le pasa la funcion activation o lo que va a realizar dicha neurona si es "disparada" o "activada". Relu es la default o rectify linear unit
+	model.add(tf.keras.layers.Dense(128,activation = tf.nn.relu))
 	model.add(tf.keras.layers.Dense(128,activation = tf.nn.relu))
 	#Vamos a crear para este modelo, dos capas intermedias
 	model.add(tf.keras.layers.Dense(10,activation = tf.nn.softmax)) #Capa output, utilizamos softmax por que queremos visualizar el output como una distribucion de porcentajes
 	#Fin del modelo
+
+
+def as_keras_metric(method):
+    import functools
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.python.keras import backend as K
+    @functools.wraps(method)
+    def wrapper(self, args, **kwargs):
+        """ Wrapper for turning tensorflow metrics into keras metrics """
+        value, update_op = method(self, args, **kwargs)
+        K.get_session().run(tf.local_variables_initializer())
+        with tf.control_dependencies([update_op]):
+            value = tf.identity(value)
+        return value
+    return wrapper
 
 #Funcion: trainModel
 #Se encarga de compilar o entrenar el modelo
@@ -52,7 +69,9 @@ def trainModel():
 	#Se le pasa el optimizador (adam) es que el se usa por defecto y la metrica de perdida o el porcentaje de error. 
 	#Las redes neuronales siempre buscan disminuir la perdida de precision.
 	#Y las metricas que queremos visualizar o seguir a lo largo del proceso, en este caso la precision
-	model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
+	precision = as_keras_metric(tf.metrics.precision)
+	recall = as_keras_metric(tf.metrics.recall)
+	model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = [precision])
 
 	#Entrenamos el modelo, epochs viene siendo la cantidad de ciclos que se va entrenar la red neuronal
 	model.fit(train_images, train_labels, epochs = 3)
@@ -72,6 +91,7 @@ def trainModel():
 def saveModel(modelName):
 	global model
 	model.save(modelName + '.h5')
+
 
 #Funcion: main
 #Normaliza la data, construye el modelo, lo entrena y finalmente lo guarda
