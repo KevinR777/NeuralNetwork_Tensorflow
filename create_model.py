@@ -38,7 +38,7 @@ def buildModel():
 	#Esta capa no tiene parámetros para aprender; sólo reformatea los datos.
 	model.add(tf.keras.layers.Flatten(input_shape = ((28, 28)))) #Capa de input, el input lo queremos ver de manera plana
 	#Vamos a crear para este modelo, dos capas intermedias
-	#model.add(tf.keras.layers.Dense(64,activation = tf.nn.relu)) #Capa hidden 1, 128 es el numero de neuronas o units, y se le pasa la funcion activation o lo que va a realizar dicha neurona si es "disparada" o "activada". Relu es la default o rectify linear unit
+	#model.add(tf.keras.layers.Dense(512,activation = tf.nn.relu)) #Capa hidden 1, 128 es el numero de neuronas o units, y se le pasa la funcion activation o lo que va a realizar dicha neurona si es "disparada" o "activada". Relu es la default o rectify linear unit
 	model.add(tf.keras.layers.Dense(128,activation = tf.nn.relu))
 	model.add(tf.keras.layers.Dense(128,activation = tf.nn.relu))
 	#Vamos a crear para este modelo, dos capas intermedias
@@ -53,7 +53,6 @@ def as_keras_metric(method):
     from tensorflow.python.keras import backend as K
     @functools.wraps(method)
     def wrapper(self, args, **kwargs):
-        """ Wrapper for turning tensorflow metrics into keras metrics """
         value, update_op = method(self, args, **kwargs)
         K.get_session().run(tf.local_variables_initializer())
         with tf.control_dependencies([update_op]):
@@ -71,20 +70,25 @@ def trainModel():
 	#Y las metricas que queremos visualizar o seguir a lo largo del proceso, en este caso la precision
 	precision = as_keras_metric(tf.metrics.precision)
 	recall = as_keras_metric(tf.metrics.recall)
-	model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = [precision])
+	model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = [precision,'accuracy',recall])
 
 	#Entrenamos el modelo, epochs viene siendo la cantidad de ciclos que se va entrenar la red neuronal
 	model.fit(train_images, train_labels, epochs = 3)
 
 	#Calculamos los valores de perdida y de precision
-	val_loss, val_acc = model.evaluate(train_images, train_labels)
-	print("El valor o porcentaje de perdida es del: " + str(val_loss))
-	print("El valor o porcentaje de precision es del: " + str(val_acc))
-
-
-	val_loss_test, val_acc_test = model.evaluate(test_images, test_labels)
+	val_loss, val_prec, val_acc, val_recall = model.evaluate(train_images, train_labels)
+	print("-------------------------------------------------------------------------------------------------------------------")
+	print("El valor o porcentaje de perdida durante entrenamiento es del: " + str(val_loss))
+	print("El valor o porcentaje de precision durante entrenamiento es del: " + str(val_prec))
+	print("El valor o porcentaje de exactitud durante entrenamiento es del: " + str(val_acc))
+	print("El valor o porcentaje de exhaustividad durante entrenamiento es del: " + str(val_recall))
+	print("-------------------------------------------------------------------------------------------------------------------")
+	val_loss_test, val_prec_test, val_acc_test, val_recall_test = model.evaluate(test_images, test_labels)
 	print("El valor o porcentaje de perdida con el conjunto de prueba es del: " + str(val_loss_test))
-	print("El valor o porcentaje de precision con el conjunto de prueba es del: " + str(val_acc_test))
+	print("El valor o porcentaje de precision con el conjunto de prueba es del: " + str(val_prec_test))
+	print("El valor o porcentaje de exactitud con el conjunto de prueba es del: " + str(val_acc_test))
+	print("El valor o porcentaje de exhaustividad con el conjunto de prueba es del: " + str(val_recall_test))
+	print("-------------------------------------------------------------------------------------------------------------------")
 
 #Funcion: saveModel
 #Guardamos el modelo
